@@ -38,6 +38,8 @@ android {
         buildConfig = true
     }
     testOptions { unitTests { isIncludeAndroidResources = true } }
+    // AGP 9 doesn't merge library assets into app unit-test assets; expose the seed DB to Robolectric tests.
+    sourceSets.getByName("test").assets.directories.add("${rootDir}/core/data/src/main/assets")
     packaging { resources { excludes += setOf("/META-INF/{AL2.0,LGPL2.1}", "META-INF/LICENSE*", "META-INF/NOTICE*") } }
 }
 

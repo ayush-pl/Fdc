@@ -28,7 +28,7 @@ class TestGraph(
     val time = FixedTimeProvider(Clock.fixed(Instant.parse("${today}T07:30:00Z"), ZoneId.of("UTC")))
     val changes = ChangeTracker(db, time)
     val seeder = FoodSeeder(object : SeedAssetSource(context) {
-        override fun open(): java.io.InputStream = java.io.File("src/main/assets/seed/foods.json.gz").inputStream()
+        override fun open(): java.io.InputStream = java.io.File("src/main/assets/seed/foods.seed").inputStream()
     }, db)
     val foods = FoodRepository(db, time, changes)
     val recipes = RecipeRepository(db, foods, time, changes)

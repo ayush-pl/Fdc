@@ -100,7 +100,7 @@ fun HomeScreen(nav: NavHostController, vm: HomeViewModel = hiltViewModel()) {
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         s.prefs.waterQuickAmountsMl.take(4).forEach { ml ->
-                            AssistChip(onClick = { vm.addWater(ml.toDouble()) }, label = { Text("+$ml ml") }, modifier = Modifier.testTag("water_$ml"))
+                            AssistChip(onClick = { vm.addWater(ml.toDouble()) }, label = { Text("+$ml ml", maxLines = 1, softWrap = false, style = MaterialTheme.typography.labelMedium) }, modifier = Modifier.weight(1f).testTag("water_$ml"))
                         }
                     }
                 }

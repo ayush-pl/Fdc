@@ -139,7 +139,7 @@ class FoodSeeder @Inject constructor(
 
     companion object {
         const val SEED_VERSION = 1
-        const val ASSET = "seed/foods.json.gz"
+        const val ASSET = "seed/foods.seed"
         const val KEY_SEED_VERSION = "seed_version"
         private val json = Json { ignoreUnknownKeys = true }
     }

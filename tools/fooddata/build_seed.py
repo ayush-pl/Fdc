@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Builds the bundled food database asset (app/src/main/assets/seed/foods.json.gz) from USDA
+Builds the bundled food database asset (app/src/main/assets/seed/foods.seed) from USDA
 FoodData Central CSV downloads (public domain, CC0 1.0).
 
 Usage:

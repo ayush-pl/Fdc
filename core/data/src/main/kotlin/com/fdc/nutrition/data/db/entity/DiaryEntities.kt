@@ -35,7 +35,7 @@ data class MealEntity(
         ForeignKey(entity = RecipeEntity::class, parentColumns = ["id"], childColumns = ["recipe_id"], onDelete = ForeignKey.RESTRICT),
     ],
     indices = [
-        Index("date"), Index(value = ["date", "meal_id"]), Index("food_id"), Index("recipe_id"), Index("meal_id"),
+        Index("date"), Index(value = ["date", "meal_id"]), Index("food_id"), Index("recipe_id"), Index("meal_id"), Index("logged_at"),
         Index(value = ["planned_source_key"], unique = true),
     ],
 )

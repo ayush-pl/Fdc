@@ -135,6 +135,12 @@ class SyncEngine @Inject constructor(
                     val known = dao.version(rec.entityType, rec.entityId)
                     if (known != null && rec.version <= known) continue
                     val pending = dao.queued(rec.entityType, rec.entityId)
+                    if (pending != null && !rec.deleted && same(codec.read(rec.entityType, rec.entityId), rec.payload)) {
+                        // Same content on both sides (e.g. default meals created on each device): not a conflict.
+                        dao.remove(pending.id)
+                        dao.putVersion(SyncRecordVersionEntity(rec.entityType, rec.entityId, rec.version))
+                        continue
+                    }
                     if (pending != null) {
                         // Both sides changed: keep both versions and let the user decide.
                         dao.addConflict(SyncConflictEntity(entityType = rec.entityType, entityId = rec.entityId, localPayload = codec.read(rec.entityType, rec.entityId)?.toString(),
@@ -171,7 +177,9 @@ class SyncEngine @Inject constructor(
                             if (current?.id == q.id) dao.remove(q.id)
                             dao.putVersion(SyncRecordVersionEntity(q.entityType, q.entityId, res.version)); pushed++; progressed = true
                         }
-                        is PushResult.Conflict -> {
+                        is PushResult.Conflict -> if (res.remote != null && !res.remote.deleted && same(payload, res.remote.payload)) {
+                            dao.remove(q.id); dao.putVersion(SyncRecordVersionEntity(q.entityType, q.entityId, res.remote.version)); progressed = true
+                        } else {
                             dao.addConflict(SyncConflictEntity(entityType = q.entityType, entityId = q.entityId, localPayload = payload?.toString(), remotePayload = res.remote?.payload?.toString(),
                                 remoteVersion = res.remote?.version ?: -1, detectedAt = time.now(), resolved = false))
                             dao.markFailed(q.id, "Conflict", SyncStatus.CONFLICT); conflicts++; progressed = true
@@ -186,6 +194,8 @@ class SyncEngine @Inject constructor(
         }
         return pushed to conflicts
     }
+
+    private fun same(a: JsonElement?, b: JsonElement?): Boolean = a != null && b != null && a == b
 
     /** Resolve a conflict by keeping the local version (it will overwrite the cloud copy on next sync). */
     suspend fun keepLocal(conflictId: Long) = db.withTransaction {

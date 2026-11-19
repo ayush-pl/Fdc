@@ -36,7 +36,7 @@ class Converters {
         UserProfileEntity::class, UserPreferencesEntity::class, ReminderEntity::class, AppMetadataEntity::class,
         SyncMetadataEntity::class, SyncQueueEntity::class, SyncRecordVersionEntity::class, SyncConflictEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

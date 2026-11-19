@@ -23,6 +23,7 @@ interface RecordDao {
     @Query("SELECT * FROM food_favourites") suspend fun favourites(): List<FoodFavouriteEntity>
     @Query("SELECT COUNT(*) FROM foods WHERE id = :id") suspend fun foodExists(id: String): Int
     @Query("SELECT COUNT(*) FROM recipes WHERE id = :id") suspend fun recipeExists(id: String): Int
+    @Query("SELECT COUNT(*) FROM food_categories WHERE id = :id") suspend fun categoryExists(id: String): Int
     @Query("SELECT * FROM food_servings WHERE source = 'USER' AND food_id IN (SELECT id FROM foods WHERE is_custom = 0)") suspend fun userServingsOnDatabaseFoods(): List<FoodServingEntity>
 
     @Query("SELECT id FROM foods WHERE is_custom = 1") suspend fun customFoodIds(): List<String>

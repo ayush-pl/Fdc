@@ -42,4 +42,7 @@ class TestGraph(
     val off = OpenFoodFactsProvider(http, offBaseUrl)
     val usda = UsdaFdcProvider(http, profile, usdaBaseUrl)
     val imports = ProductImportRepository(foods, off, usda)
+    val codec = com.fdc.nutrition.data.backup.RecordCodec(db)
+    val backup = com.fdc.nutrition.data.backup.BackupRepository(db, codec, time, changes)
+    val csv = com.fdc.nutrition.data.backup.CsvExporter(db, recipes)
 }

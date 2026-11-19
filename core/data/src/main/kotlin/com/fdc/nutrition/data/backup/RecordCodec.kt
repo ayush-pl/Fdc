@@ -65,13 +65,19 @@ class RecordCodec @Inject constructor(private val db: AppDatabase) {
     private suspend fun foodOrNull(id: String?) = id?.takeIf { rec.foodExists(it) > 0 }
     private suspend fun recipeOrNull(id: String?) = id?.takeIf { rec.recipeExists(it) > 0 }
     private suspend fun safePortion(p: PortionColumns) = p.copy(foodId = foodOrNull(p.foodId), recipeId = recipeOrNull(p.recipeId))
+    /** Falls back to "homemade" for unknown categories (e.g. from a newer app version). */
+    private suspend fun safeCategory(id: String): String {
+        if (rec.categoryExists(id) > 0) return id
+        if (rec.categoryExists("homemade") == 0) db.foodDao().upsertCategories(listOf(FoodCategoryEntity("homemade", "Homemade foods", "🏠", 21)))
+        return "homemade"
+    }
     private suspend fun ensureMeal(id: String) { if (rec.meal(id) == null) db.diaryDao().upsertMeal(MealEntity(id, id.replace('_', ' ').replaceFirstChar { it.uppercase() }, 50, false)) }
 
     /** Upserts a record from its JSON payload. */
     suspend fun write(type: String, payload: JsonElement) = db.withTransaction {
         when (type) {
             EntityType.FOOD -> { val f = json.decodeFromJsonElement<FoodDto>(payload)
-                db.foodDao().insertFoodGraph(f.toEntity(), FoodNutrientsEntity(f.id, f.nutrients.toColumns()), f.servings.map { it.toEntity(f.id) }, f.barcodes.map { FoodBarcodeEntity(it, f.id, Instant.ofEpochMilli(f.updatedAt)) }) }
+                db.foodDao().insertFoodGraph(f.toEntity().copy(categoryId = safeCategory(f.categoryId)), FoodNutrientsEntity(f.id, f.nutrients.toColumns()), f.servings.map { it.toEntity(f.id) }, f.barcodes.map { FoodBarcodeEntity(it, f.id, Instant.ofEpochMilli(f.updatedAt)) }) }
             EntityType.FAVOURITE -> { val f = json.decodeFromJsonElement<FavouriteDto>(payload); if (foodOrNull(f.foodId) != null) db.foodDao().addFavourite(FoodFavouriteEntity(f.foodId, Instant.ofEpochMilli(f.createdAt))) }
             EntityType.DIARY_ENTRY -> { val e = json.decodeFromJsonElement<DiaryEntryDto>(payload).toEntity(); ensureMeal(e.mealId)
                 db.diaryDao().upsert(e.copy(foodId = foodOrNull(e.foodId), recipeId = recipeOrNull(e.recipeId))) }

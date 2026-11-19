@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FDC Nutrition</string>
+    <string name="channel_reminders">Logging reminders</string>
+    <string name="channel_reminders_desc">Optional reminders to log meals, water and review your day</string>
+</resources>

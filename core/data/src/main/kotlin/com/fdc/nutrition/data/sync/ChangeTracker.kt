@@ -25,7 +25,8 @@ object EntityType {
     const val WATER = "water_entry"
     const val BODY = "body_measurement"
     const val PROFILE = "profile"
-    val ALL = listOf(FOOD, FAVOURITE, MEAL, DIARY_ENTRY, MEAL_NOTE, DAY_LOG, SAVED_MEAL, RECIPE, PLANNED_MEAL, RECURRENCE, MEAL_PLAN, TARGET, WATER, BODY, PROFILE)
+    /** Dependency order: referenced records come before the records that reference them. */
+    val ALL = listOf(FOOD, MEAL, RECIPE, FAVOURITE, DIARY_ENTRY, MEAL_NOTE, DAY_LOG, SAVED_MEAL, PLANNED_MEAL, RECURRENCE, MEAL_PLAN, TARGET, WATER, BODY, PROFILE)
 }
 
 /**

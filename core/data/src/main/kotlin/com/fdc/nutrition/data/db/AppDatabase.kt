@@ -50,6 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
     abstract fun metadataDao(): MetadataDao
     abstract fun syncDao(): SyncDao
+    abstract fun recordDao(): com.fdc.nutrition.data.db.dao.RecordDao
 
     companion object { const val NAME = "fdc_nutrition.db" }
 }

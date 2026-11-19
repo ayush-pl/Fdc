@@ -31,8 +31,15 @@ enum class PreparationState(val displayName: String) {
 
 data class FoodCategory(val id: String, val name: String, val sortOrder: Int, val emoji: String)
 
-/** Tri-state answer used for diet / allergen classification where data may be incomplete. */
-enum class Tristate { YES, NO, UNKNOWN }
+/**
+ * Diet classification of a food. "Vegetarian" follows the Indian convention of lacto-vegetarian
+ * (no meat, fish or eggs); [EGG] marks foods whose only animal flesh-free exception is egg.
+ * [UNKNOWN] is used whenever the source does not let us classify reliably.
+ */
+enum class DietClass(val displayName: String) {
+    VEGAN("Vegan"), VEGETARIAN("Vegetarian"), EGG("Contains egg"), PESCATARIAN("Contains fish/seafood"),
+    NON_VEGETARIAN("Contains meat"), UNKNOWN("Diet info unavailable");
+}
 
 data class Food(
     val id: String,
@@ -57,10 +64,7 @@ data class Food(
     val allergens: Set<String> = emptySet(),
     /** True when allergen information was actually supplied by the source (even if the set is empty). */
     val allergenInfoKnown: Boolean = false,
-    val vegetarian: Tristate = Tristate.UNKNOWN,
-    val vegan: Tristate = Tristate.UNKNOWN,
-    val containsEgg: Tristate = Tristate.UNKNOWN,
-    val containsFish: Tristate = Tristate.UNKNOWN,
+    val dietClass: DietClass = DietClass.UNKNOWN,
     val notes: String? = null,
     val createdAt: Instant,
     val updatedAt: Instant = createdAt,

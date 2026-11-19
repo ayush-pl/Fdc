@@ -1,8 +1,8 @@
 package com.fdc.nutrition.domain.calc
 
+import com.fdc.nutrition.domain.model.DietClass
 import com.fdc.nutrition.domain.model.DietaryPreference
 import com.fdc.nutrition.domain.model.Food
-import com.fdc.nutrition.domain.model.Tristate
 
 enum class Compatibility { COMPATIBLE, INCOMPATIBLE, UNKNOWN }
 
@@ -11,22 +11,18 @@ enum class Compatibility { COMPATIBLE, INCOMPATIBLE, UNKNOWN }
  * never silently classified as suitable or allergen-free.
  */
 object DietCompatibility {
-    fun forDiet(food: Food, pref: DietaryPreference): Compatibility = when (pref) {
-        DietaryPreference.NON_VEGETARIAN, DietaryPreference.CUSTOM -> Compatibility.COMPATIBLE
-        DietaryPreference.VEGETARIAN -> food.vegetarian.toCompat()
-        DietaryPreference.VEGAN -> food.vegan.toCompat()
-        DietaryPreference.EGGETARIAN -> when {
-            food.vegetarian == Tristate.YES -> Compatibility.COMPATIBLE
-            food.vegetarian == Tristate.NO && food.containsEgg == Tristate.YES && food.containsFish != Tristate.YES -> Compatibility.UNKNOWN
-            food.vegetarian == Tristate.NO -> Compatibility.INCOMPATIBLE
-            else -> Compatibility.UNKNOWN
+    fun forDiet(food: Food, pref: DietaryPreference): Compatibility = forDiet(food.dietClass, pref)
+
+    fun forDiet(c: DietClass, pref: DietaryPreference): Compatibility {
+        if (c == DietClass.UNKNOWN) return if (pref == DietaryPreference.NON_VEGETARIAN || pref == DietaryPreference.CUSTOM) Compatibility.COMPATIBLE else Compatibility.UNKNOWN
+        val allowed: Set<DietClass> = when (pref) {
+            DietaryPreference.NON_VEGETARIAN, DietaryPreference.CUSTOM -> DietClass.entries.toSet()
+            DietaryPreference.VEGAN -> setOf(DietClass.VEGAN)
+            DietaryPreference.VEGETARIAN -> setOf(DietClass.VEGAN, DietClass.VEGETARIAN)
+            DietaryPreference.EGGETARIAN -> setOf(DietClass.VEGAN, DietClass.VEGETARIAN, DietClass.EGG)
+            DietaryPreference.PESCATARIAN -> setOf(DietClass.VEGAN, DietClass.VEGETARIAN, DietClass.EGG, DietClass.PESCATARIAN)
         }
-        DietaryPreference.PESCATARIAN -> when {
-            food.vegetarian == Tristate.YES -> Compatibility.COMPATIBLE
-            food.containsFish == Tristate.YES -> Compatibility.COMPATIBLE
-            food.vegetarian == Tristate.NO -> Compatibility.INCOMPATIBLE
-            else -> Compatibility.UNKNOWN
-        }
+        return if (c in allowed) Compatibility.COMPATIBLE else Compatibility.INCOMPATIBLE
     }
 
     /** Allergens from [userAllergies] known to be present; UNKNOWN when the food has no allergen data. */
@@ -38,9 +34,5 @@ object DietCompatibility {
             !food.allergenInfoKnown -> Compatibility.UNKNOWN to emptySet()
             else -> Compatibility.COMPATIBLE to emptySet()
         }
-    }
-
-    private fun Tristate.toCompat() = when (this) {
-        Tristate.YES -> Compatibility.COMPATIBLE; Tristate.NO -> Compatibility.INCOMPATIBLE; Tristate.UNKNOWN -> Compatibility.UNKNOWN
     }
 }

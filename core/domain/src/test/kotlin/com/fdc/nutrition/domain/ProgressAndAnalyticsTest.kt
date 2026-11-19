@@ -68,8 +68,12 @@ class ProgressAndAnalyticsTest {
     }
 
     @Test fun `diet compatibility never guesses with unknown data`() {
-        val unknown = Fx.rice.copy(vegetarian = Tristate.UNKNOWN)
+        val unknown = Fx.rice.copy(dietClass = DietClass.UNKNOWN)
         assertThat(DietCompatibility.forDiet(unknown, DietaryPreference.VEGETARIAN)).isEqualTo(Compatibility.UNKNOWN)
+        assertThat(DietCompatibility.forDiet(DietClass.EGG, DietaryPreference.VEGETARIAN)).isEqualTo(Compatibility.INCOMPATIBLE)
+        assertThat(DietCompatibility.forDiet(DietClass.EGG, DietaryPreference.EGGETARIAN)).isEqualTo(Compatibility.COMPATIBLE)
+        assertThat(DietCompatibility.forDiet(DietClass.PESCATARIAN, DietaryPreference.PESCATARIAN)).isEqualTo(Compatibility.COMPATIBLE)
+        assertThat(DietCompatibility.forDiet(DietClass.NON_VEGETARIAN, DietaryPreference.PESCATARIAN)).isEqualTo(Compatibility.INCOMPATIBLE)
         val (status, _) = DietCompatibility.allergenStatus(unknown, setOf("milk"))
         assertThat(status).isEqualTo(Compatibility.UNKNOWN)
         val paneer = Fx.rice.copy(allergens = setOf("milk"), allergenInfoKnown = true)
